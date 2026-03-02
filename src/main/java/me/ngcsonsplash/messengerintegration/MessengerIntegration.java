@@ -1,38 +1,26 @@
 package me.ngcsonsplash.messengerintegration;
 
-import me.ngcsonsplash.messengerintegration.bridge.BridgeUtil;
+import me.ngcsonsplash.messengerintegration.listener.ChatListener;
 import me.ngcsonsplash.messengerintegration.listener.DeathListener;
+import me.ngcsonsplash.messengerintegration.listener.JoinLeaveListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class MessengerIntegration extends JavaPlugin {
+public final class MessengerIntegration extends JavaPlugin {
 
     @Override
     public void onEnable() {
 
-        // Tạo config nếu chưa có
         saveDefaultConfig();
 
-        // Lấy URL NodeJS bridge
-        String bridgeUrl = getConfig().getString("bridge.url");
+        getServer().getPluginManager().registerEvents(new DeathListener(this), this);
+        getServer().getPluginManager().registerEvents(new JoinLeaveListener(this), this);
+        getServer().getPluginManager().registerEvents(new ChatListener(this), this);
 
-        if (bridgeUrl == null || bridgeUrl.isEmpty()) {
-            getLogger().warning("Bridge URL chưa được cấu hình trong config.yml!");
-        } else {
-            BridgeUtil.init(this, bridgeUrl);
-            getLogger().info("Đã kết nối Bridge: " + bridgeUrl);
-        }
-
-        // Register event listener
-        getServer().getPluginManager().registerEvents(
-                new DeathListener(),
-                this
-        );
-
-        getLogger().info("MessengerIntegration đã bật thành công!");
+        getLogger().info("MessengerIntegration enabled!");
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("MessengerIntegration đã tắt.");
+        getLogger().info("MessengerIntegration disabled!");
     }
 }
