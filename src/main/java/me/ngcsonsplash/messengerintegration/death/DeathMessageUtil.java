@@ -3,6 +3,7 @@ package me.ngcsonsplash.messengerintegration.death;
 import me.ngcsonsplash.messengerintegration.death.environment.*;
 import me.ngcsonsplash.messengerintegration.death.mob.*;
 import me.ngcsonsplash.messengerintegration.death.pvp.PvPDeathMessages;
+import me.ngcsonsplash.messengerintegration.death.environment.SuicideDeathMessages;
 
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent;
