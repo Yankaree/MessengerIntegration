@@ -1,0 +1,7 @@
+name: MessengerIntegration
+main: me.ngcsonsplash.messengerintegration.MessengerIntegrationPlugin
+version: 1.0.0
+author: ngcsonsplash
+description: Minecraft ↔ Messenger Bridge
+api-version: 1.13
+load: POSTWORLD
