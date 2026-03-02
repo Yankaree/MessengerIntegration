@@ -1,5 +1,5 @@
 name: MessengerIntegration
-main: me.ngcsonsplash.messengerintegration.MessengerIntegrationPlugin
+main: me.ngcsonsplash.messengerintegration.MessengerIntegration
 version: 1.0.0
 author: ngcsonsplash
 description: Minecraft ↔ Messenger Bridge

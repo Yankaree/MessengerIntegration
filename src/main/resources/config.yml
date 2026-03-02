@@ -1,13 +1,3 @@
 bridge:
-  url: "http://100.100.100.100:3000/minecraft"
-  timeout: 5000
-
-webhook:
-  port: 8080
-
-format:
-  chat: "[CHAT] %player%: %message%"
-  join: "[JOIN] %player%"
-  leave: "[LEAVE] %player%"
-  death: "%message%"
-  streak: "[STREAK] %player% đang có %streak% mạng!"
+  enabled: true
+  url: "http://100.XX.XX.XX:3000/minecraft"
