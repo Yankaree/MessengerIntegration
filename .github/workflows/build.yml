@@ -1,4 +1,4 @@
-name: Build
+name: WebsoketSupport
 
 on:
   push:
