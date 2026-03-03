@@ -1,6 +1,9 @@
 package me.ngcsonsplash.messengerintegration;
 
+import me.ngcsonsplash.messengerintegration.bridge.BridgeClient;
 import me.ngcsonsplash.messengerintegration.listener.ChatListener;
+import me.ngcsonsplash.messengerintegration.listener.DeathListener;
+import me.ngcsonsplash.messengerintegration.listener.JoinLeaveListener;
 import me.ngcsonsplash.messengerintegration.websocket.MinecraftWSClient;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -9,47 +12,35 @@ import java.net.URI;
 public final class MessengerIntegration extends JavaPlugin {
 
     private MinecraftWSClient wsClient;
+    private BridgeClient bridgeClient;
 
     @Override
     public void onEnable() {
-
         saveDefaultConfig();
 
-        if (getConfig().getBoolean("websocket.enabled")) {
-            try {
-                String host = getConfig().getString("websocket.host");
-                int port = getConfig().getInt("websocket.port");
+        try {
+            String wsUrl = getConfig().getString("websocket.url");
+            wsClient = new MinecraftWSClient(new URI(wsUrl), this);
+            wsClient.connect();
+            bridgeClient = new BridgeClient(wsClient);
 
-                URI uri = new URI("ws://" + host + ":" + port);
-                wsClient = new MinecraftWSClient(uri, this);
-                wsClient.connect();
-
-                getLogger().info("Connecting to WS: " + uri);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        } catch (Exception e) {
+            getLogger().severe("WebSocket init failed: " + e.getMessage());
         }
 
         getServer().getPluginManager().registerEvents(new ChatListener(this), this);
-
-        getLogger().info("MessengerIntegration enabled.");
+        getServer().getPluginManager().registerEvents(new JoinLeaveListener(this), this);
+        getServer().getPluginManager().registerEvents(new DeathListener(this), this);
     }
 
     @Override
     public void onDisable() {
-        if (wsClient != null) {
+        if (wsClient != null && wsClient.isOpen()) {
             wsClient.close();
         }
     }
 
-    public void sendToNode(String message) {
-        if (wsClient != null && wsClient.isOpen()) {
-            wsClient.send(message);
-        }
-    }
-
-    public String getPrefix() {
-        return getConfig().getString("websocket.prefix");
+    public BridgeClient getBridgeClient() {
+        return bridgeClient;
     }
 }

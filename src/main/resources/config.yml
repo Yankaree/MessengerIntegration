@@ -1,5 +1,2 @@
 websocket:
-  enabled: true
-  host: "100.64.0.20"   # IP Tailscale NodeJS
-  port: 8081
-  prefix: "§b[Messenger] §f"
+  url: "ws://100.x.x.x:3000"
