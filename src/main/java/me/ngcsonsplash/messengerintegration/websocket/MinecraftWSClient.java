@@ -6,13 +6,15 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class MinecraftWSClient extends WebSocketClient {
 
     private final MessengerIntegration plugin;
-    private Timer keepAliveTimer;
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private boolean manuallyClosed = false;
 
     public MinecraftWSClient(URI serverUri, MessengerIntegration plugin) {
         super(serverUri);
@@ -21,12 +23,13 @@ public class MinecraftWSClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
-        plugin.getLogger().info("WebSocket connected!");
+        plugin.getLogger().info("WebSocket connected.");
         startKeepAlive();
     }
 
     @Override
     public void onMessage(String message) {
+        // Chuyển về main thread trước khi dùng Bukkit API
         Bukkit.getScheduler().runTask(plugin, () -> {
             Bukkit.broadcastMessage("§a[Bridge] §f" + message);
         });
@@ -34,9 +37,11 @@ public class MinecraftWSClient extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        plugin.getLogger().warning("WebSocket closed. Reconnecting in 5s...");
-        stopKeepAlive();
-        reconnectLater();
+        plugin.getLogger().warning("WebSocket closed: " + reason);
+
+        if (!manuallyClosed) {
+            reconnectLater();
+        }
     }
 
     @Override
@@ -44,31 +49,32 @@ public class MinecraftWSClient extends WebSocketClient {
         plugin.getLogger().warning("WebSocket error: " + ex.getMessage());
     }
 
-    private void startKeepAlive() {
-        keepAliveTimer = new Timer();
-        keepAliveTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (isOpen()) {
-                    send("ping");
-                }
-            }
-        }, 30000, 30000);
-    }
-
-    private void stopKeepAlive() {
-        if (keepAliveTimer != null) {
-            keepAliveTimer.cancel();
+    public void sendMessage(String message) {
+        if (isOpen()) {
+            send(message);
         }
     }
 
     private void reconnectLater() {
-        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
+        scheduler.schedule(() -> {
             try {
+                plugin.getLogger().info("Attempting reconnect...");
                 reconnect();
-            } catch (Exception e) {
-                plugin.getLogger().warning("Reconnect failed: " + e.getMessage());
+            } catch (Exception ignored) {}
+        }, 5, TimeUnit.SECONDS);
+    }
+
+    private void startKeepAlive() {
+        scheduler.scheduleAtFixedRate(() -> {
+            if (isOpen()) {
+                send("ping");
             }
-        }, 100L);
+        }, 30, 30, TimeUnit.SECONDS);
+    }
+
+    public void shutdown() {
+        manuallyClosed = true;
+        scheduler.shutdownNow();
+        close();
     }
 }

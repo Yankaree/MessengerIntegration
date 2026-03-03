@@ -5,6 +5,7 @@ import me.ngcsonsplash.messengerintegration.listener.ChatListener;
 import me.ngcsonsplash.messengerintegration.listener.DeathListener;
 import me.ngcsonsplash.messengerintegration.listener.JoinLeaveListener;
 import me.ngcsonsplash.messengerintegration.websocket.MinecraftWSClient;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.net.URI;
@@ -18,29 +19,29 @@ public final class MessengerIntegration extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
 
+        String wsUrl = getConfig().getString("websocket.url");
         try {
-            String wsUrl = getConfig().getString("websocket.url");
             wsClient = new MinecraftWSClient(new URI(wsUrl), this);
             wsClient.connect();
+
             bridgeClient = new BridgeClient(wsClient);
 
-        } catch (Exception e) {
-            getLogger().severe("WebSocket init failed: " + e.getMessage());
-        }
+            Bukkit.getPluginManager().registerEvents(new ChatListener(bridgeClient), this);
+            Bukkit.getPluginManager().registerEvents(new JoinLeaveListener(bridgeClient), this);
+            Bukkit.getPluginManager().registerEvents(new DeathListener(bridgeClient), this);
 
-        getServer().getPluginManager().registerEvents(new ChatListener(this), this);
-        getServer().getPluginManager().registerEvents(new JoinLeaveListener(this), this);
-        getServer().getPluginManager().registerEvents(new DeathListener(this), this);
+            getLogger().info("MessengerIntegration enabled.");
+
+        } catch (Exception e) {
+            getLogger().severe("Invalid WebSocket URL in config.yml");
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onDisable() {
-        if (wsClient != null && wsClient.isOpen()) {
-            wsClient.close();
+        if (wsClient != null) {
+            wsClient.shutdown();
         }
-    }
-
-    public BridgeClient getBridgeClient() {
-        return bridgeClient;
     }
 }

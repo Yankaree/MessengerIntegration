@@ -10,9 +10,7 @@ public class BridgeClient {
         this.wsClient = wsClient;
     }
 
-    public void sendMessage(String message) {
-        if (wsClient != null && wsClient.isOpen()) {
-            wsClient.send(message);
-        }
+    public void send(String message) {
+        wsClient.sendMessage(message);
     }
 }
