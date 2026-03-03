@@ -1,22 +1,23 @@
 package me.ngcsonsplash.messengerintegration.listener;
 
-import me.ngcsonsplash.messengerintegration.MessengerIntegration;
+import me.ngcsonsplash.messengerintegration.bridge.BridgeClient;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 public class ChatListener implements Listener {
 
-    private final MessengerIntegration plugin;
+    private final BridgeClient bridgeClient;
 
-    public ChatListener(MessengerIntegration plugin) {
-        this.plugin = plugin;
+    public ChatListener(BridgeClient bridgeClient) {
+        this.bridgeClient = bridgeClient;
     }
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
+        String player = event.getPlayer().getName();
+        String message = event.getMessage();
 
-        String msg = event.getPlayer().getName() + ": " + event.getMessage();
-        plugin.sendToNode(msg);
+        bridgeClient.send("chat", player + ": " + message);
     }
 }
