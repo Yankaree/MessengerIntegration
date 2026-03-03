@@ -1,3 +1,5 @@
-bridge:
+websocket:
   enabled: true
-  url: "http://100.XX.XX.XX:3000/minecraft"
+  host: "100.64.0.20"   # IP Tailscale NodeJS
+  port: 8081
+  prefix: "§b[Messenger] §f"

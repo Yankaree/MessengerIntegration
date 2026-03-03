@@ -1,26 +1,55 @@
 package me.ngcsonsplash.messengerintegration;
 
 import me.ngcsonsplash.messengerintegration.listener.ChatListener;
-import me.ngcsonsplash.messengerintegration.listener.DeathListener;
-import me.ngcsonsplash.messengerintegration.listener.JoinLeaveListener;
+import me.ngcsonsplash.messengerintegration.websocket.MinecraftWSClient;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.net.URI;
+
 public final class MessengerIntegration extends JavaPlugin {
+
+    private MinecraftWSClient wsClient;
 
     @Override
     public void onEnable() {
 
         saveDefaultConfig();
 
-        getServer().getPluginManager().registerEvents(new DeathListener(this), this);
-        getServer().getPluginManager().registerEvents(new JoinLeaveListener(this), this);
+        if (getConfig().getBoolean("websocket.enabled")) {
+            try {
+                String host = getConfig().getString("websocket.host");
+                int port = getConfig().getInt("websocket.port");
+
+                URI uri = new URI("ws://" + host + ":" + port);
+                wsClient = new MinecraftWSClient(uri, this);
+                wsClient.connect();
+
+                getLogger().info("Connecting to WS: " + uri);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         getServer().getPluginManager().registerEvents(new ChatListener(this), this);
 
-        getLogger().info("MessengerIntegration enabled!");
+        getLogger().info("MessengerIntegration enabled.");
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("MessengerIntegration disabled!");
+        if (wsClient != null) {
+            wsClient.close();
+        }
+    }
+
+    public void sendToNode(String message) {
+        if (wsClient != null && wsClient.isOpen()) {
+            wsClient.send(message);
+        }
+    }
+
+    public String getPrefix() {
+        return getConfig().getString("websocket.prefix");
     }
 }
