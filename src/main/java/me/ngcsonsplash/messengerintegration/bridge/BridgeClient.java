@@ -10,7 +10,18 @@ public class BridgeClient {
         this.wsClient = wsClient;
     }
 
-    public void send(String message) {
-        wsClient.sendMessage(message);
+    public void send(String type, String content) {
+        if (wsClient == null) return;
+
+        String json = "{"
+                + "\"type\":\"" + escape(type) + "\","
+                + "\"content\":\"" + escape(content) + "\""
+                + "}";
+
+        wsClient.sendMessage(json);
+    }
+
+    private String escape(String input) {
+        return input.replace("\"", "\\\"");
     }
 }
