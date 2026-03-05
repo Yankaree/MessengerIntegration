@@ -70,8 +70,6 @@
                         </goals>
                         <configuration>
 
-                            <minimizeJar>true</minimizeJar>
-
                             <relocations>
                                 <relocation>
                                     <pattern>org.java_websocket</pattern>

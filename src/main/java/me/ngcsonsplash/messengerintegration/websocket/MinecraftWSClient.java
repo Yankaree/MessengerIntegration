@@ -1,5 +1,8 @@
 package me.ngcsonsplash.messengerintegration.websocket;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import me.ngcsonsplash.messengerintegration.MessengerIntegration;
 import org.bukkit.Bukkit;
 import org.java_websocket.client.WebSocketClient;
@@ -29,16 +32,25 @@ public class MinecraftWSClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        // Chuyển về main thread trước khi dùng Bukkit API
         Bukkit.getScheduler().runTask(plugin, () -> {
-            Bukkit.broadcastMessage("§a[Bridge] §f" + message);
+            try {
+                JsonObject json = JsonParser.parseString(message).getAsJsonObject();
+                if (json.has("sender") && json.has("message")) {
+                    String sender = json.get("sender").getAsString();
+                    String msg = json.get("message").getAsString();
+                    Bukkit.broadcastMessage("§a[Bridge] §b" + sender + "§f: " + msg);
+                } else {
+                    Bukkit.broadcastMessage("§a[Bridge] §f" + message);
+                }
+            } catch (JsonSyntaxException | IllegalStateException e) {
+                Bukkit.broadcastMessage("§a[Bridge] §f" + message);
+            }
         });
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
         plugin.getLogger().warning("WebSocket closed: " + reason);
-
         if (!manuallyClosed) {
             reconnectLater();
         }
@@ -56,25 +68,30 @@ public class MinecraftWSClient extends WebSocketClient {
     }
 
     private void reconnectLater() {
-        scheduler.schedule(() -> {
-            try {
-                plugin.getLogger().info("Attempting reconnect...");
-                reconnect();
-            } catch (Exception ignored) {}
-        }, 5, TimeUnit.SECONDS);
+        if (!manuallyClosed) {
+            scheduler.schedule(() -> {
+                try {
+                    plugin.getLogger().info("Attempting reconnect...");
+                    reconnect();
+                } catch (Exception ignored) {}
+            }, 5, TimeUnit.SECONDS);
+        }
     }
 
     private void startKeepAlive() {
         scheduler.scheduleAtFixedRate(() -> {
             if (isOpen()) {
-                send("ping");
+                JsonObject ping = new JsonObject();
+                ping.addProperty("type", "ping");
+                send(ping.toString());
             }
         }, 30, 30, TimeUnit.SECONDS);
     }
 
-    public void shutdown() {
+    @Override
+    public void close() {
         manuallyClosed = true;
+        super.close();
         scheduler.shutdownNow();
-        close();
     }
 }

@@ -2,7 +2,9 @@ package me.ngcsonsplash.messengerintegration;
 
 import me.ngcsonsplash.messengerintegration.bridge.BridgeClient;
 import me.ngcsonsplash.messengerintegration.listener.*;
+import me.ngcsonsplash.messengerintegration.status.StatusTask;
 import me.ngcsonsplash.messengerintegration.websocket.MinecraftWSClient;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.net.URI;
@@ -40,6 +42,9 @@ public final class MessengerIntegration extends JavaPlugin {
             getServer().getPluginManager().registerEvents(
                     new CommandListener(bridgeClient), this);
 
+            // Schedule status task
+            Bukkit.getScheduler().runTaskTimerAsynchronously(this, new StatusTask(this), 0L, 100L); // 5 seconds
+
             getLogger().info("MessengerIntegration enabled.");
 
         } catch (Exception e) {
@@ -53,5 +58,9 @@ public final class MessengerIntegration extends JavaPlugin {
             wsClient.close();
         }
         getLogger().info("MessengerIntegration disabled.");
+    }
+
+    public MinecraftWSClient getWsClient() {
+        return wsClient;
     }
 }

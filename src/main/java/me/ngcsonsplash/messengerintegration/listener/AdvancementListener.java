@@ -1,6 +1,8 @@
 package me.ngcsonsplash.messengerintegration.listener;
 
+import io.papermc.paper.advancement.AdvancementDisplay;
 import me.ngcsonsplash.messengerintegration.bridge.BridgeClient;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerAdvancementDoneEvent;
@@ -15,9 +17,10 @@ public class AdvancementListener implements Listener {
 
     @EventHandler
     public void onAdvancement(PlayerAdvancementDoneEvent event) {
-        if (event.getAdvancement().getDisplay() == null) return;
+        AdvancementDisplay display = event.getAdvancement().getDisplay();
+        if (display == null) return;
 
-        String title = event.getAdvancement().getDisplay().getTitle();
+        String title = PlainTextComponentSerializer.plainText().serialize(display.title());
         String player = event.getPlayer().getName();
 
         bridgeClient.send("advancement", player + " achieved " + title);
