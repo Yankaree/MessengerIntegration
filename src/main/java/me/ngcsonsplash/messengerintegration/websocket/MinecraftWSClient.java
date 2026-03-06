@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import me.ngcsonsplash.messengerintegration.MessengerIntegration;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -32,18 +33,18 @@ public class MinecraftWSClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        Bukkit.getGlobalRegionScheduler().run(plugin, (task) -> {
             try {
                 JsonObject json = JsonParser.parseString(message).getAsJsonObject();
                 if (json.has("sender") && json.has("message")) {
                     String sender = json.get("sender").getAsString();
                     String msg = json.get("message").getAsString();
-                    Bukkit.broadcastMessage("§a[Bridge] §b" + sender + "§f: " + msg);
+                    Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "Bridge" + ChatColor.DARK_AQUA + "] " + ChatColor.GOLD + sender + ChatColor.WHITE + ": " + msg);
                 } else {
-                    Bukkit.broadcastMessage("§a[Bridge] §f" + message);
+                    Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "Bridge" + ChatColor.DARK_AQUA + "] " + ChatColor.WHITE + message);
                 }
             } catch (JsonSyntaxException | IllegalStateException e) {
-                Bukkit.broadcastMessage("§a[Bridge] §f" + message);
+                Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "Bridge" + ChatColor.DARK_AQUA + "] " + ChatColor.WHITE + message);
             }
         });
     }

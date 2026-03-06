@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.net.URI;
+import java.util.concurrent.TimeUnit;
 
 public final class MessengerIntegration extends JavaPlugin {
 
@@ -43,7 +44,7 @@ public final class MessengerIntegration extends JavaPlugin {
                     new CommandListener(bridgeClient), this);
 
             // Schedule status task
-            Bukkit.getScheduler().runTaskTimerAsynchronously(this, new StatusTask(this), 0L, 100L); // 5 seconds
+            Bukkit.getAsyncScheduler().runAtFixedRate(this, (task) -> new StatusTask(this).run(), 0L, 5L, TimeUnit.SECONDS);
 
             getLogger().info("MessengerIntegration enabled.");
 
