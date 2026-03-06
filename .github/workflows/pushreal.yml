@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -23,8 +24,8 @@ jobs:
           java-version: 21
           cache: maven
 
-      - name: Build with Maven
-        run: mvn clean package
+      - name: Build
+        run: mvn cleqn package
 
       - name: Upload Release
         uses: softprops/action-gh-release@v2
