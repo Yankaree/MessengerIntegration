@@ -22,7 +22,7 @@ public class BridgeUtil {
 
         if (endpoint == null || endpoint.isEmpty()) return;
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        Bukkit.getAsyncScheduler().runNow(plugin, (task) -> {
 
             try {
 

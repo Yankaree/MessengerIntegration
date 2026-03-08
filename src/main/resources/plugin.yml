@@ -3,6 +3,6 @@ main: me.ngcsonsplash.messengerintegration.MessengerIntegration
 version: 1.0.0
 author: ngcsonsplash
 description: Minecraft ↔ Messenger Bridge
-api-version: 1.13
+api-version: 1.21
 load: POSTWORLD
 folia-supported: true

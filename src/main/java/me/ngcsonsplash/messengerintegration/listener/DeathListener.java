@@ -1,6 +1,8 @@
 package me.ngcsonsplash.messengerintegration.listener;
 
 import me.ngcsonsplash.messengerintegration.bridge.BridgeClient;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.plaintext.PlainTextComponentSerializer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -15,8 +17,9 @@ public class DeathListener implements Listener {
 
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
-        String msg = event.getDeathMessage();
-        if (msg != null) {
+        Component deathMsg = event.deathMessage();
+        if (deathMsg != null) {
+            String msg = PlainTextComponentSerializer.plainText().serialize(deathMsg);
             bridgeClient.send("death", msg);
         }
     }

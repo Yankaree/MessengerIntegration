@@ -4,8 +4,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import me.ngcsonsplash.messengerintegration.MessengerIntegration;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -39,12 +39,22 @@ public class MinecraftWSClient extends WebSocketClient {
                 if (json.has("sender") && json.has("message")) {
                     String sender = json.get("sender").getAsString();
                     String msg = json.get("message").getAsString();
-                    Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "Bridge" + ChatColor.DARK_AQUA + "] " + ChatColor.GOLD + sender + ChatColor.WHITE + ": " + msg);
+
+                    Component broadcastMsg = Component.text()
+                            .append(Component.text("[", NamedTextColor.DARK_AQUA))
+                            .append(Component.text("Bridge", NamedTextColor.AQUA))
+                            .append(Component.text("] ", NamedTextColor.DARK_AQUA))
+                            .append(Component.text(sender, NamedTextColor.GOLD))
+                            .append(Component.text(": ", NamedTextColor.WHITE))
+                            .append(Component.text(msg, NamedTextColor.WHITE))
+                            .build();
+
+                    Bukkit.broadcast(broadcastMsg);
                 } else {
-                    Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "Bridge" + ChatColor.DARK_AQUA + "] " + ChatColor.WHITE + message);
+                    Bukkit.broadcast(Component.text(message));
                 }
             } catch (JsonSyntaxException | IllegalStateException e) {
-                Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "Bridge" + ChatColor.DARK_AQUA + "] " + ChatColor.WHITE + message);
+                Bukkit.broadcast(Component.text(message));
             }
         });
     }
