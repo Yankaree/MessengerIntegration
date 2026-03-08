@@ -36,25 +36,53 @@ public class MinecraftWSClient extends WebSocketClient {
         Bukkit.getGlobalRegionScheduler().run(plugin, (task) -> {
             try {
                 JsonObject json = JsonParser.parseString(message).getAsJsonObject();
-                if (json.has("sender") && json.has("message")) {
-                    String sender = json.get("sender").getAsString();
-                    String msg = json.get("message").getAsString();
+                if (json.has("type")) {
+                    String type = json.get("type").getAsString();
 
-                    Component broadcastMsg = Component.text()
-                            .append(Component.text("[", NamedTextColor.DARK_AQUA))
-                            .append(Component.text("Bridge", NamedTextColor.AQUA))
-                            .append(Component.text("] ", NamedTextColor.DARK_AQUA))
-                            .append(Component.text(sender, NamedTextColor.GOLD))
-                            .append(Component.text(": ", NamedTextColor.WHITE))
-                            .append(Component.text(msg, NamedTextColor.WHITE))
-                            .build();
+                    if (type.equals("messenger_message")) {
+                        // Handle messages coming from Messenger
+                        if (json.has("sender") && json.has("message")) {
+                            String sender = json.get("sender").getAsString();
+                            String msg = json.get("message").getAsString();
 
-                    Bukkit.broadcast(broadcastMsg);
+                            // Check for /status command from Messenger
+                            if (msg.trim().equalsIgnoreCase("/status")) {
+                                // Execute the command from console to trigger StatusCommand
+                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "msstatus");
+                                return; // Command handled, don't broadcast raw message
+                            }
+
+                            Component broadcastMsg = Component.text()
+                                    .append(Component.text("[", NamedTextColor.DARK_AQUA))
+                                    .append(Component.text("Bridge", NamedTextColor.AQUA))
+                                    .append(Component.text("] ", NamedTextColor.DARK_AQUA))
+                                    .append(Component.text(sender, NamedTextColor.GOLD))
+                                    .append(Component.text(": ", NamedTextColor.WHITE))
+                                    .append(Component.text(msg, NamedTextColor.WHITE))
+                                    .build();
+
+                            Bukkit.broadcast(broadcastMsg);
+                        }
+                    } else if (type.equals("command_response")) {
+                        // Handle responses from the bot for commands issued by Minecraft
+                        if (json.has("message")) {
+                            Bukkit.broadcast(Component.text("[Bridge Bot]: ", NamedTextColor.YELLOW).append(Component.text(json.get("message").getAsString(), NamedTextColor.WHITE)));
+                        }
+                    } else if (type.equals("status_request")) { // New type for status request from bot
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "msstatus");
+                        return;
+                    }
+                    else {
+                        // Fallback for other JSON types from bot, if any
+                        Bukkit.broadcast(Component.text("[Bridge Bot Info]: ", NamedTextColor.GRAY).append(Component.text(message, NamedTextColor.WHITE)));
+                    }
                 } else {
-                    Bukkit.broadcast(Component.text(message));
+                    // If no 'type' field, broadcast raw message
+                    Bukkit.broadcast(Component.text("[Bridge Bot Raw]: ", NamedTextColor.GRAY).append(Component.text(message, NamedTextColor.WHITE)));
                 }
             } catch (JsonSyntaxException | IllegalStateException e) {
-                Bukkit.broadcast(Component.text(message));
+                // If message is not valid JSON, broadcast raw message
+                Bukkit.broadcast(Component.text("[Bridge Bot Error]: ", NamedTextColor.RED).append(Component.text("Invalid message from bot: " + message, NamedTextColor.WHITE)));
             }
         });
     }

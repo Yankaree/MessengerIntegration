@@ -1,5 +1,6 @@
 package me.ngcsonsplash.messengerintegration;
 
+import me.ngcsonsplash.messengerintegration.command.StatusCommand;
 import me.ngcsonsplash.messengerintegration.bridge.BridgeClient;
 import me.ngcsonsplash.messengerintegration.listener.*;
 import me.ngcsonsplash.messengerintegration.status.StatusTask;
@@ -42,6 +43,9 @@ public final class MessengerIntegration extends JavaPlugin {
 
             getServer().getPluginManager().registerEvents(
                     new CommandListener(bridgeClient), this);
+            
+            // Register command
+            getCommand("msstatus").setExecutor(new StatusCommand(this, bridgeClient));
 
             // Schedule status task
             Bukkit.getAsyncScheduler().runAtFixedRate(this, (task) -> new StatusTask(this).run(), 0L, 5L, TimeUnit.SECONDS);

@@ -6,3 +6,10 @@ description: Minecraft ↔ Messenger Bridge
 api-version: 1.21
 load: POSTWORLD
 folia-supported: true
+
+commands:
+  msstatus:
+    description: Get current server status.
+    usage: /msstatus
+    permission: messengerintegration.status
+    permission-message: You do not have permission to use this command.
