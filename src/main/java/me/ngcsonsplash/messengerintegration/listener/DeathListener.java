@@ -2,7 +2,7 @@ package me.ngcsonsplash.messengerintegration.listener;
 
 import me.ngcsonsplash.messengerintegration.bridge.BridgeClient;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.plaintext.PlainTextComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
