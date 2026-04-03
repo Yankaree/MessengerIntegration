@@ -6,6 +6,7 @@ import com.google.gson.JsonSyntaxException;
 import me.ngcsonsplash.messengerintegration.MessengerIntegration;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit; // Thêm import này
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
